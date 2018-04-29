@@ -212,7 +212,6 @@ class Training(object):
         self.encoder.train()
         self.clf.train()
         self.embedder.train()
-        if self.config.lambda_dis > 0: self.dis.train()
         train_iter = self._create_iter(train_data, self.config.wbatchsize)
         unlabel_iter = self._create_iter(dev_data, self.config.wbatchsize_unlabel)
         for batch_index, train_batch_raw in enumerate(train_iter):
