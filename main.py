@@ -45,8 +45,6 @@ logger.info(repr(object.clf))
 logger.info(repr(object.clf_loss))
 if args.lambda_ae:
     logger.info(repr(object.ae))
-if args.lambda_dis:
-    logger.info(repr(object.dis))
 
 # Train the model
 object(train_data, dev_data, test_data, unlabel_data)
