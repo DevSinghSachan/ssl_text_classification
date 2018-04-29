@@ -206,7 +206,7 @@ def get_preprocess_args():
                         default='elec/train.txt',
                         type=str)
     parser.add_argument('--elec_unlabel',
-                        default='elec/unlabel.txt',
+                        default='elec/test.txt',
                         type=str)
 
 

@@ -262,16 +262,25 @@ class Training(object):
                               perturb_norm_length=self.config.perturb_norm_length)
 
             if self.config.lambda_vat > 0:
-                lvat = vat_loss(self.embedder,
-                                self.encoder,
-                                self.clf,
-                                unlabel_batch,
-                                p_logit=self.clf(memory_bank_unlabel),
-                                perturb_norm_length=self.config.perturb_norm_length)
+                lvat_train = vat_loss(self.embedder,
+                                      self.encoder,
+                                      self.clf,
+                                      train_batch,
+                                      p_logit=pred,
+                                      perturb_norm_length=self.config.perturb_norm_length)
+                lvat_unlabel = vat_loss(self.embedder,
+                                        self.encoder,
+                                        self.clf,
+                                        unlabel_batch,
+                                        p_logit=self.clf(memory_bank_unlabel),
+                                        perturb_norm_length=self.config.perturb_norm_length)
+                lvat = 0.5 * (lvat_train + lvat_unlabel)
 
             lentropy = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_entropy > 0:
-                lentropy = entropy_loss(self.clf(memory_bank_unlabel))
+                lentropy_train = entropy_loss(pred)
+                lentropy_unlabel = entropy_loss(self.clf(memory_bank_unlabel))
+                lentropy = 0.5 * (lentropy_train + lentropy_unlabel)
 
             lae = Variable(
                 torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))

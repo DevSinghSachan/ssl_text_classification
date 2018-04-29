@@ -106,9 +106,14 @@ if __name__ == "__main__":
     test_path = os.path.join(args.input, args.test_filename)
     unlabel_path = os.path.join(args.input, args.unlabel_filename)
 
-    word_cntr = count_words(unlabel_path, args.vocab_size, args.tok)
+    train_word_cntr = count_words(train_path, args.vocab_size, args.tok)
+    valid_word_cntr = count_words(valid_path, args.vocab_size, args.tok)
+    all_words = list(set(train_word_cntr + valid_word_cntr))
 
-    all_words = word_cntr
+    # word_cntr = count_words(unlabel_path, args.vocab_size, args.tok)
+    #
+    # all_words = word_cntr
+
     vocab = ['<pad>', '<eos>', '<unk>', '<bos>'] + all_words
     w2id = {word: index for index, word in enumerate(vocab)}
 
