@@ -129,7 +129,6 @@ class Training(object):
             self.encoder.cuda()
             self.clf.cuda()
             self.clf_loss.cuda()
-            if self.config.lambda_dis > 0: self.dis.cuda()
             if self.config.lambda_ae > 0: self.ae.cuda()
         self.time_s = time()
 
