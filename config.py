@@ -181,6 +181,7 @@ def get_preprocess_args():
                         default='demo',
                         help='Output file for the prepared data')
 
+    # ACLImdb Tokenized
     parser.add_argument('--aclImdb_tok_dev',
                         default='aclImdb_tok/test.txt',
                         type=str)  # No dev set, test and dev set are the same
@@ -192,6 +193,20 @@ def get_preprocess_args():
                         type=str)
     parser.add_argument('--aclImdb_tok_unlabel',
                         default='aclImdb_tok/unlabel.txt',
+                        type=str)
+
+    # Elec
+    parser.add_argument('--elec_dev',
+                        default='elec/test.txt',
+                        type=str)  # No dev set, test and dev set are the same
+    parser.add_argument('--elec_test',
+                        default='elec/test.txt',
+                        type=str)
+    parser.add_argument('--elec_train',
+                        default='elec/train.txt',
+                        type=str)
+    parser.add_argument('--elec_unlabel',
+                        default='elec/unlabel.txt',
                         type=str)
 
 
