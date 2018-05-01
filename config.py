@@ -192,7 +192,7 @@ def get_preprocess_args():
                         default='aclImdb_tok/train.txt',
                         type=str)
     parser.add_argument('--aclImdb_tok_unlabel',
-                        default='aclImdb_tok/unlabel.txt',
+                        default='aclImdb_tok/test.txt',
                         type=str)
 
     # Elec
