@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import io
 import os
+import h5py
 from gensim.models import KeyedVectors
 import pickle
 
@@ -43,5 +44,8 @@ if __name__ == "__main__":
 
     word_vectors = load_pretrained_embeddings(args.embeddings, id2w,
                                               unif_weight=0.25)
-    np.save(os.path.join(args.input, args.save_data + '.word_vectors.npy'),
-            word_vectors)
+    np.save(os.path.join(args.input, args.save_data + '.word_vectors.npy'), word_vectors)
+
+    # with h5py.File(os.path.join(args.input, args.save_data + '.word_vectors.h5'), 'w') as hf:
+    #     hf.create_dataset("elec_word_vectors", data=word_vectors, compression="gzip", compression_opts=9)
+

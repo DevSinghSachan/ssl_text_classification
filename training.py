@@ -21,6 +21,7 @@ from model import LSTMEncoder, Classifier, Discriminator, SequenceCriteria, \
 from tensorboardX import SummaryWriter
 import pprint
 from metrics import ConfusionMatrix
+from exp_moving_avg import ExponentialMovingAverage
 
 if torch.cuda.is_available():
     torch.cuda.set_device(0)
@@ -114,15 +115,31 @@ class Training(object):
 
         self.writer = SummaryWriter(log_dir="TFBoardSummary")
         self.global_steps = 0
-        self.enc_clf_opt = torch.optim.Adam(self._get_trainabe_modules(),
-                                            lr=self.config.lr,
-                                            betas=(config.beta1,
-                                                   config.beta2),
-                                            weight_decay=config.weight_decay)
+        self.enc_clf_opt = Adam(self._get_trainabe_modules(),
+                                lr=self.config.lr,
+                                betas=(config.beta1,
+                                       config.beta2),
+                                weight_decay=config.weight_decay,
+                                eps=config.eps)
+        self.ema_embedder = ExponentialMovingAverage(decay=0.999)
+        self.ema_embedder.register(self.embedder.state_dict())
 
-        self.scheduler = lr_scheduler.ReduceLROnPlateau(self.enc_clf_opt,
-                                                        'max',
-                                                        verbose=True)
+        self.ema_encoder = ExponentialMovingAverage(decay=0.999)
+        self.ema_encoder.register(self.encoder.state_dict())
+
+        self.ema_clf = ExponentialMovingAverage(decay=0.999)
+        self.ema_clf.register(self.clf.state_dict())
+
+        if config.scheduler == "ReduceLROnPlateau":
+            self.scheduler = lr_scheduler.ReduceLROnPlateau(self.enc_clf_opt,
+                                                            mode='max',
+                                                            factor=config.lr_decay,
+                                                            patience=config.patience,
+                                                            verbose=True)
+        elif config.scheduler == "ExponentialLR":
+            self.scheduler = lr_scheduler.ExponentialLR(self.enc_clf_opt,
+                                                        gamma=0.9998)
+
         self._init_or_load_model()
         if config.multi_gpu:
             self.embedder.cuda()
@@ -166,7 +183,12 @@ class Training(object):
 
     def _save_model(self):
         state = {'epoch': self.epoch,
-                 'state_dict': self.encoder.state_dict(),
+                 'state_dict_encoder': self.ema_encoder.shadow_variable_dict,
+                 # self.encoder.state_dict(),
+                 'state_dict_embedder': self.ema_embedder.shadow_variable_dict,
+                 # self.embedder.state_dict(),
+                 'state_dict_clf': self.ema_clf.shadow_variable_dict,
+                 # self.clf.state_dict(),
                  'best_accuracy': self.best_accuracy}
         torch.save(state, os.path.join(self.config.output_path,
                                        self.config.model_file))
@@ -179,7 +201,9 @@ class Training(object):
             dict_ = torch.load(checkpoint_path)
             self.epoch = dict_['epoch']
             self.best_accuracy = dict_['best_accuracy']
-            self.encoder.load_state_dict(dict_['state_dict'])
+            self.embedder.load_state_dict(dict_['state_dict_embedder'])
+            self.encoder.load_state_dict(dict_['state_dict_encoder'])
+            self.clf.load_state_dict(dict_['state_dict_clf'])
             self.logger.info(
                 "=> loaded checkpoint '{}' (epoch {})".format(checkpoint_path,
                                                               self.epoch))
@@ -213,7 +237,8 @@ class Training(object):
         self.clf.train()
         self.embedder.train()
         train_iter = self._create_iter(train_data, self.config.wbatchsize)
-        unlabel_iter = self._create_iter(dev_data, self.config.wbatchsize_unlabel)
+        unlabel_iter = self._create_iter(dev_data,
+                                         self.config.wbatchsize_unlabel)
         for batch_index, train_batch_raw in enumerate(train_iter):
             seq_iter = list(zip(*train_batch_raw))[1]
             seq_words = len(list(itertools.chain.from_iterable(seq_iter)))
@@ -243,17 +268,21 @@ class Training(object):
                     unlabel_batch_raw = add_noise(unlabel_batch_raw,
                                                   self.config.noise_dropout,
                                                   self.config.random_permutation)
-                unlabel_batch = batch_utils.seq_pad_concat(unlabel_batch_raw, -1)
+                unlabel_batch = batch_utils.seq_pad_concat(unlabel_batch_raw,
+                                                           -1)
                 unlabel_embedded = self.embedder(unlabel_batch)
-                memory_bank_unlabel, enc_final_unlabel = self.encoder(unlabel_embedded,
-                                                                      unlabel_batch)
+                memory_bank_unlabel, enc_final_unlabel = self.encoder(
+                    unlabel_embedded,
+                    unlabel_batch)
 
             pred = self.clf(memory_bank_train)
             accuracy = self.get_accuracy(cm, pred.data, train_batch.labels.data)
             lclf = self.clf_loss(pred, train_batch.labels)
 
-            lat = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
-            lvat = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
+            lat = Variable(
+                torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
+            lvat = Variable(
+                torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_at > 0:
                 lat = at_loss(self.embedder,
                               self.encoder,
@@ -268,22 +297,27 @@ class Training(object):
                                       train_batch,
                                       p_logit=pred,
                                       perturb_norm_length=self.config.perturb_norm_length)
-                lvat_unlabel = vat_loss(self.embedder,
-                                        self.encoder,
-                                        self.clf,
-                                        unlabel_batch,
-                                        p_logit=self.clf(memory_bank_unlabel),
-                                        perturb_norm_length=self.config.perturb_norm_length)
-                lvat = 0.5 * (lvat_train + lvat_unlabel)
+                if self.config.inc_unlabeled_loss:
+                    lvat_unlabel = vat_loss(self.embedder,
+                                            self.encoder,
+                                            self.clf,
+                                            unlabel_batch,
+                                            p_logit=self.clf(memory_bank_unlabel),
+                                            perturb_norm_length=self.config.perturb_norm_length)
+                    lvat = 0.5 * (lvat_train + lvat_unlabel)
+                else:
+                    lvat = lvat_train
 
             lentropy = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_entropy > 0:
                 lentropy_train = entropy_loss(pred)
-                lentropy_unlabel = entropy_loss(self.clf(memory_bank_unlabel))
-                lentropy = 0.5 * (lentropy_train + lentropy_unlabel)
+                if self.config.inc_unlabeled_loss:
+                    lentropy_unlabel = entropy_loss(self.clf(memory_bank_unlabel))
+                    lentropy = 0.5 * (lentropy_train + lentropy_unlabel)
+                else:
+                    lentropy = lentropy_train
 
-            lae = Variable(
-                torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
+            lae = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_ae > 0:
                 lae = self.ae(memory_bank_unlabel,
                               enc_final_unlabel,
@@ -315,6 +349,11 @@ class Training(object):
                                                  self.config.max_norm)
             report_stats.grad_norm += norm
             self.enc_clf_opt.step()
+            if self.config.scheduler == "ExponentialLR":
+                self.scheduler.step()
+            self.ema_embedder.apply(self.embedder.named_parameters())
+            self.ema_encoder.apply(self.encoder.named_parameters())
+            self.ema_clf.apply(self.clf.named_parameters())
 
             report_func(self.epoch,
                         batch_index,
@@ -326,7 +365,7 @@ class Training(object):
 
             if self.global_steps % self.config.eval_steps == 0:
                 cm_, accuracy, prc_dev = self._run_evaluate(dev_data)
-                self.logger.info("- dev accuracy {}".format(accuracy))
+                self.logger.info("- dev accuracy {} | best dev accuracy {} ".format(accuracy, self.best_accuracy))
                 self.writer.add_scalar("Dev_Accuracy", accuracy,
                                        self.global_steps)
                 pred_, lab_ = zip(*prc_dev)
@@ -341,7 +380,8 @@ class Training(object):
                     self.logger.info("- new best score!")
                     self.best_accuracy = accuracy
                     self._save_model()
-                self.scheduler.step(accuracy)
+                if self.config.scheduler == "ReduceLROnPlateau":
+                    self.scheduler.step(accuracy)
                 self.encoder.train()
                 self.embedder.train()
                 self.clf.train()
@@ -354,12 +394,11 @@ class Training(object):
         pprint.pprint(cm.get_all_metrics())
 
         cm, dev_accuracy, _ = self._run_evaluate(dev_data)
-        self.logger.info("- Dev accuracy  {}".format(dev_accuracy))
+        self.logger.info("- Dev accuracy  {} | best dev accuracy {}".format(dev_accuracy, self.best_accuracy))
         pprint.pprint(cm.get_all_metrics())
         self.writer.add_scalars("Overall_Accuracy",
                                 {"Train_Accuracy": train_accuracy,
-                                 "Dev_Accuracy": dev_accuracy,
-                                 },
+                                 "Dev_Accuracy": dev_accuracy},
                                 self.global_steps)
         return dev_accuracy
 

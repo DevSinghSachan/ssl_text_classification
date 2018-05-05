@@ -91,8 +91,6 @@ def get_train_args():
     parser.add_argument('--lstm_dropout', default=0.5, type=float)
     parser.add_argument('--locked_dropout', default=0.5, type=float)
     parser.add_argument('--batch_size', default=64, type=int)
-    parser.add_argument('--lr', default=0.001, type=float)
-    parser.add_argument('--lr_decay', default=0.5, type=float)
     parser.add_argument('--nepoch_no_imprv', default=3, type=int)
     parser.add_argument('--nchkp_no_imprv', default=30, type=int)
     parser.add_argument('--hidden_size', default=1024, type=int)
@@ -100,10 +98,17 @@ def get_train_args():
     parser.add_argument('--class_weight', default='uniform', type=str)
     parser.add_argument('--optim', default='adam', type=str)
     parser.add_argument('--eval_steps', default=1000, type=int)
+
     # Optimizer Params
+    parser.add_argument('--lr', default=0.001, type=float)
+    parser.add_argument('--lr_decay', default=0.5, type=float)
     # Paper: https://arxiv.org/pdf/1707.05589.pdf (Beta1 is set to 0)
     parser.add_argument('--beta1', default=0.9, type=float)
     parser.add_argument('--beta2', default=0.999, type=float)
+    parser.add_argument('--eps', default=1e-8, type=float)
+    parser.add_argument('--patience', default=20, type=int)
+    parser.add_argument('--scheduler', default='ReduceLROnPlateau',
+                        type=str, help='ReduceLROnPlateau|ExponentialLR')
 
     parser.add_argument('--pool_type', default='max_pool', type=str)
     parser.add_argument('--dynamic_pool_size', default=20, type=int)
@@ -115,6 +120,8 @@ def get_train_args():
     parser.add_argument('--lambda_at', default=0.0, type=float)
     parser.add_argument('--lambda_vat', default=0.0, type=float)
     parser.add_argument('--lambda_entropy', default=0.0, type=float)
+    parser.add_argument('--inc_unlabeled_loss', dest='inc_unlabeled_loss', action='store_true')
+    parser.set_defaults(inc_unlabeled_loss=False)
 
     parser.add_argument('--perturb_norm_length', default=5.0, type=float)
     parser.add_argument('--max_embedding_norm', default=None, type=float)
@@ -206,7 +213,21 @@ def get_preprocess_args():
                         default='elec/train.txt',
                         type=str)
     parser.add_argument('--elec_unlabel',
-                        default='elec/test.txt',
+                        default='elec/test.txt', #'elec/for-semi/unlabel.txt',
+                        type=str)
+
+    # Agnews
+    parser.add_argument('--agnews_dev',
+                        default='agnews/test.txt',
+                        type=str)  # No dev set, test and dev set are the same
+    parser.add_argument('--agnews_test',
+                        default='agnews/test.txt',
+                        type=str)
+    parser.add_argument('--agnews_train',
+                        default='agnews/train.txt',
+                        type=str)
+    parser.add_argument('--agnews_unlabel',
+                        default='agnews/test.txt',
                         type=str)
 
 

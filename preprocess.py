@@ -108,7 +108,8 @@ if __name__ == "__main__":
 
     train_word_cntr = count_words(train_path, args.vocab_size, args.tok)
     valid_word_cntr = count_words(valid_path, args.vocab_size, args.tok)
-    all_words = list(set(train_word_cntr + valid_word_cntr))
+    unlabel_word_cntr = count_words(unlabel_path, args.vocab_size, args.tok)
+    all_words = list(set(train_word_cntr + valid_word_cntr + unlabel_word_cntr))
 
     # word_cntr = count_words(unlabel_path, args.vocab_size, args.tok)
     #
