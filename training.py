@@ -121,14 +121,6 @@ class Training(object):
                                        config.beta2),
                                 weight_decay=config.weight_decay,
                                 eps=config.eps)
-        self.ema_embedder = ExponentialMovingAverage(decay=0.999)
-        self.ema_embedder.register(self.embedder.state_dict())
-
-        self.ema_encoder = ExponentialMovingAverage(decay=0.999)
-        self.ema_encoder.register(self.encoder.state_dict())
-
-        self.ema_clf = ExponentialMovingAverage(decay=0.999)
-        self.ema_clf.register(self.clf.state_dict())
 
         if config.scheduler == "ReduceLROnPlateau":
             self.scheduler = lr_scheduler.ReduceLROnPlateau(self.enc_clf_opt,
@@ -147,6 +139,14 @@ class Training(object):
             self.clf.cuda()
             self.clf_loss.cuda()
             if self.config.lambda_ae > 0: self.ae.cuda()
+
+        self.ema_embedder = ExponentialMovingAverage(decay=0.999)
+        self.ema_embedder.register(self.embedder.state_dict())
+        self.ema_encoder = ExponentialMovingAverage(decay=0.999)
+        self.ema_encoder.register(self.encoder.state_dict())
+        self.ema_clf = ExponentialMovingAverage(decay=0.999)
+        self.ema_clf.register(self.clf.state_dict())
+
         self.time_s = time()
 
     def _get_trainabe_modules(self):
