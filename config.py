@@ -39,11 +39,6 @@ def get_train_args():
 
     parser.add_argument('--init_scalar', default=0.05, type=float)
 
-    # parser.add_argument('--kernel_size_list', default=[1, 2, 3, 4, 5, 6, 7], type=list)
-    # parser.add_argument('--num_cnn_features_list', default=[50, 50, 50, 50, 50, 50, 50], type=list)
-    # parser.add_argument('--word_kernel_size_list', default=[3, 4, 5], type=list)
-    # parser.add_argument('--num_word_cnn_features_list', default=[400, 300, 300], type=list)
-
     parser.add_argument('--num_layers', default=1, type=int)
     parser.add_argument('--unif', help='Initializer bounds for embeddings',
                         default=0.25)
@@ -65,19 +60,13 @@ def get_train_args():
 
     # Evaluation and Checkpoint
     parser.add_argument('--load_checkpoint', default=True, type=bool)
-    # parser.add_argument('--load_lang_model_checkpoint',
-    #                     dest='load_lang_model_checkpoint',
-    #                     action='store_true')
-    # parser.set_defaults(load_lang_model_checkpoint=False)
-    #
-    # parser.add_argument('--lang_model_chkpt_path', default='../language_modelling/results/clf/model.weights/',
-    #                     type=str)
 
     # Pre-trained word embeddings path
     parser.add_argument('--use_pretrained_embeddings',
                         dest='use_pretrained_embeddings', action='store_true')
     parser.set_defaults(use_pretrained_embeddings=False)
-    parser.add_argument('--train_embeddings', default=True, type=bool)
+    parser.add_argument('--train_embeddings', dest='--train_embeddings', action='store_true')
+    parser.set_defaults(train_embeddings=False)
     parser.add_argument('--adaptive_dropout', dest='adaptive_dropout', action='store_true')
     parser.add_argument('--finetune', dest='finetune', action='store_true')
     parser.set_defaults(finetune=False)
@@ -112,9 +101,11 @@ def get_train_args():
     parser.add_argument('--gamma', default=0.99995, type=float)
 
     parser.add_argument('--pool_type', default='max_pool', type=str)
-    parser.add_argument('--dynamic_pool_size', default=20, type=int)
+    parser.add_argument('--batching_strategy', default='dynamic', type=str,
+                        help='dynamic|fixed')
     parser.add_argument('--wbatchsize', default=3000, type=int)
     parser.add_argument('--wbatchsize_unlabel', default=12000, type=int)
+    parser.add_argument('--batchsize', default=64, type=int)
 
     parser.add_argument('--lambda_clf', default=1.0, type=float)
     parser.add_argument('--lambda_ae', default=0.0, type=float)

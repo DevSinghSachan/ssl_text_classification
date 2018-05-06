@@ -218,13 +218,19 @@ class Training(object):
         self._evaluate(test)
 
     def _create_iter(self, data_, wbatchsize):
-        iter_ = data.iterator.pool(data_,
-                                   wbatchsize,
-                                   key=lambda x: len(x[1]),
-                                   batch_size_fn=batch_size_fn,
-                                   random_shuffler=
-                                   data.iterator.RandomShuffler())
-        return iter_
+        if self.config.batching_strategy == "dynamic":
+            iter_ = data.iterator.pool(data_,
+                                       wbatchsize,
+                                       key=lambda x: len(x[1]),
+                                       batch_size_fn=batch_size_fn,
+                                       random_shuffler=
+                                       data.iterator.RandomShuffler())
+            return iter_
+        if self.config.batching_strategy == "fixed":
+            iter_ = data.iterator.pool(data_,
+                                       self.config.batchsize,
+                                       key=lambda x: len(x[1]))
+            return iter_
 
     def _run_epoch(self, train_data, dev_data, unlabel_data):
         report_stats = utils.Statistics()
