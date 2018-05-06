@@ -16,39 +16,34 @@ def work(id, queue):
         if arg_val is None:
             break
 
-        model_file = 'model_{}'.format(gpu_id)
-
-        arg_string = 'env CUDA_VISIBLE_DEVICES={} python main.py --corpus '\
-                     'aclImdb --model LSTMEncoder --multi_gpu --input temp/aclImdb_pretrained/data '\
-                      '--output_path temp/aclImdb_pretrained/model --timedistributed '\
-                      '--pool_type max_pool --d_hidden 512 --nepochs 50 '\
-                      '--nepoch_no_imprv 20 --optim adam --adaptive_dropout '\
-                      '--lstm_dropout 0.0 --word_dropout {} --locked_dropout {} --model_file {}'
-
-        # arg_string = 'env CUDA_VISIBLE_DEVICES={} python main.py --model {} --corpus {} --dropout {} --weight_decay {} ' \
-        #              '--lr 0.005 --lr_decay 0.9998 --model_file {}'
+        arg_string = \
+        'env CUDA_VISIBLE_DEVICES={} PYTHONIOENCODING=utf-8 python main.py --corpus agnews --model LSTMEncoder '\
+        '--debug --save_data demo_fastText '\
+        '--multi_gpu --input temp/agnews_pretrained/data --output_path temp/agnews_pretrained/model '\
+        '--exp_name agnews_clf_at_{}_vat_{} '\
+        '--use_pretrained_embeddings --nepoch_no_imprv 20 --timedistributed --d_hidden 512 --nepochs 40 --optim adam '\
+        '--wbatchsize 2000 --wbatchsize_unlabel 2000 --eval_steps 1000 --lstm_dropout 0.5 --word_dropout 0.5 '\
+        '--beta1 0.0 --num_layers 1 --beta2 0.98 --scheduler ExponentialLR --gamma 0.99998 '\
+        '--perturb_norm_length {} --lambda_entropy 0.0 --lambda_vat 1.0 --lambda_at 1.0'
 
         cmd_string = arg_string.format(gpu_id,
                                        arg_val[0],
-                                       arg_val[1],
-                                       model_file)
+                                       arg_val[0],
+                                       arg_val[0])
 
         print(cmd_string)
         my_env = os.environ.copy()
         my_env['CUDA_VISIBLE_DEVICES'] = gpu_id
-
         subprocess.call(cmd_string.split(), shell=False)
 
     queue.put(None)
 
 
-word_dropout = [0, 0.15, 0.25, 0.4, 0.5, 0.75, 0.85]
-locked_dropout = [0, 0.15, 0.25, 0.4, 0.5, 0.75, 0.85]
+perturb_norm_length_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
 def serve(queue):
-    for tuple_ in itertools.product(word_dropout,
-                                    locked_dropout):
+    for tuple_ in itertools.product(perturb_norm_length_list):
         queue.put(tuple_)
 
 
@@ -64,7 +59,6 @@ class Manager:
                         for i in range(self.num_process)]
         for w in self.workers:
             w.start()
-
         serve(self.queue)
 
     def stop(self):

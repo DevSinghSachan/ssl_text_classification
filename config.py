@@ -109,6 +109,7 @@ def get_train_args():
     parser.add_argument('--patience', default=20, type=int)
     parser.add_argument('--scheduler', default='ReduceLROnPlateau',
                         type=str, help='ReduceLROnPlateau|ExponentialLR')
+    parser.add_argument('--gamma', default=0.99995, type=float)
 
     parser.add_argument('--pool_type', default='max_pool', type=str)
     parser.add_argument('--dynamic_pool_size', default=20, type=int)

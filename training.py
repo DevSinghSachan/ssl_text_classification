@@ -130,7 +130,7 @@ class Training(object):
                                                             verbose=True)
         elif config.scheduler == "ExponentialLR":
             self.scheduler = lr_scheduler.ExponentialLR(self.enc_clf_opt,
-                                                        gamma=0.9998)
+                                                        gamma=config.gamma)
 
         self._init_or_load_model()
         if config.multi_gpu:
