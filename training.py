@@ -304,7 +304,10 @@ class Training(object):
                                             unlabel_batch,
                                             p_logit=self.clf(memory_bank_unlabel),
                                             perturb_norm_length=self.config.perturb_norm_length)
-                    lvat = 0.5 * (lvat_train + lvat_unlabel)
+                    if self.config.unlabeled_loss_type == "AvgTrainUnlabel":
+                        lvat = 0.5 * (lvat_train + lvat_unlabel)
+                    elif self.config.unlabeled_loss_type == "Unlabel":
+                        lvat = lvat_unlabel
                 else:
                     lvat = lvat_train
 
@@ -313,7 +316,10 @@ class Training(object):
                 lentropy_train = entropy_loss(pred)
                 if self.config.inc_unlabeled_loss:
                     lentropy_unlabel = entropy_loss(self.clf(memory_bank_unlabel))
-                    lentropy = 0.5 * (lentropy_train + lentropy_unlabel)
+                    if self.config.unlabeled_loss_type == "AvgTrainUnlabel":
+                        lentropy = 0.5 * (lentropy_train + lentropy_unlabel)
+                    elif self.config.unlabeled_loss_type == "Unlabel":
+                        lentropy = lentropy_unlabel
                 else:
                     lentropy = lentropy_train
 

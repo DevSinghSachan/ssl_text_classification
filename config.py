@@ -123,6 +123,7 @@ def get_train_args():
     parser.add_argument('--lambda_entropy', default=0.0, type=float)
     parser.add_argument('--inc_unlabeled_loss', dest='inc_unlabeled_loss', action='store_true')
     parser.set_defaults(inc_unlabeled_loss=False)
+    parser.add_argument('--unlabeled_loss_type', default='AvgTrainUnlabel', type=str)
 
     parser.add_argument('--perturb_norm_length', default=5.0, type=float)
     parser.add_argument('--max_embedding_norm', default=None, type=float)
