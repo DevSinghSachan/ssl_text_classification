@@ -463,7 +463,8 @@ class Training(object):
                         "- early stopping {} epochs without improvement".format(
                             nepoch_no_imprv))
                     break
-            self.scheduler.step(accuracy)
+            if self.config.scheduler == "ReduceLROnPlateau":
+                self.scheduler.step(accuracy)
 
     def _evaluate(self, test_data):
         self.logger.info("Evaluating model over test set")
