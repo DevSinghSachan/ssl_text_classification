@@ -150,9 +150,10 @@ class Training(object):
         self.time_s = time()
 
     def _get_trainabe_modules(self):
-        param_list = list(self.embedder.parameters()) + \
-                     list(self.encoder.parameters()) + \
+        param_list = list(self.encoder.parameters()) + \
                      list(self.clf.parameters())
+        if self.config.train_embeddings:
+            param_list += list(self.embedder.parameters())
         if self.config.lambda_ae > 0:
             param_list += list(self.ae.parameters())
         return param_list

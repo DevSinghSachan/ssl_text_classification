@@ -8,10 +8,10 @@ python preprocess.py --corpus aclImdb_tok --output ${OUT}/data --max_seq_length 
 python w2v.py --input ${OUT}/data --save_data "demo" --embeddings "vectors_aclImdb.txt"
 
 # 1. Without using pretrained embeddings
-python main.py --corpus aclImdb_tok --model LSTMEncoder --debug \
---multi_gpu --input ${OUT}/data --output_path ${OUT}/model --exp_name "aclImdb_wopretrained" \
---nepoch_no_imprv 20 --timedistributed --d_hidden 512 --nepochs 20 \
---optim adam --beta1 0.0 --beta2 0.98
+#python main.py --corpus aclImdb_tok --model LSTMEncoder --debug \
+#--multi_gpu --input ${OUT}/data --output_path ${OUT}/model --exp_name "aclImdb_wopretrained" \
+#--nepoch_no_imprv 20 --timedistributed --d_hidden 512 --nepochs 20 \
+#--optim adam --beta1 0.0 --beta2 0.98
 
 # 2. Without finetuning embeddings
 python main.py --corpus aclImdb_tok --model LSTMEncoder --debug \
