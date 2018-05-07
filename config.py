@@ -65,7 +65,7 @@ def get_train_args():
     parser.add_argument('--use_pretrained_embeddings',
                         dest='use_pretrained_embeddings', action='store_true')
     parser.set_defaults(use_pretrained_embeddings=False)
-    parser.add_argument('--train_embeddings', dest='--train_embeddings', action='store_true')
+    parser.add_argument('--train_embeddings', dest='train_embeddings', action='store_true')
     parser.set_defaults(train_embeddings=False)
     parser.add_argument('--adaptive_dropout', dest='adaptive_dropout', action='store_true')
     parser.add_argument('--finetune', dest='finetune', action='store_true')
