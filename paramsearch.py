@@ -24,7 +24,8 @@ def work(id, queue):
         '--use_pretrained_embeddings --nepoch_no_imprv 20 --timedistributed --d_hidden 512 --nepochs 40 --optim adam '\
         '--wbatchsize 2000 --wbatchsize_unlabel 2000 --eval_steps 1000 --lstm_dropout 0.5 --word_dropout 0.5 '\
         '--beta1 0.0 --num_layers 1 --beta2 0.98 --scheduler ExponentialLR --gamma 0.99998 '\
-        '--perturb_norm_length {} --lambda_entropy 0.0 --lambda_vat 1.0 --lambda_at 1.0'
+        '--perturb_norm_length {} --lambda_entropy 0.0 --lambda_vat 1.0 --lambda_at 1.0 '\
+        '--inc_unlabeled_loss --unlabeled_loss_type Unlabel'
 
         cmd_string = arg_string.format(gpu_id,
                                        arg_val[0],
