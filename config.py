@@ -232,6 +232,20 @@ def get_preprocess_args():
                         default='agnews/test.txt',
                         type=str)
 
+    # Dbpedia
+    parser.add_argument('--dbpedia_dev',
+                        default='dbpedia/test.txt',
+                        type=str)  # No dev set, test and dev set are the same
+    parser.add_argument('--dbpedia_test',
+                        default='dbpedia/test.txt',
+                        type=str)
+    parser.add_argument('--dbpedia_train',
+                        default='dbpedia/train.txt',
+                        type=str)
+    parser.add_argument('--dbpedia_unlabel',
+                        default='dbpedia/train.txt',
+                        type=str)
+
 
     # imdbSimple
     parser.add_argument('--imdbSimple_dev',
