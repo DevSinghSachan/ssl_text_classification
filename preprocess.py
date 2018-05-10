@@ -69,7 +69,7 @@ def count_words(path, max_vocab_size=40000, tok=False):
 def get_label_vocab(path, tok=False):
     vocab_label = set()
     for label, _ in read_file(path, tok):
-        vocab_label.update(label)
+        vocab_label.add(label)
     return sorted(list(vocab_label))
 
 
