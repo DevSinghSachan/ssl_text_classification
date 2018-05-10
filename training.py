@@ -230,7 +230,9 @@ class Training(object):
         if self.config.batching_strategy == "fixed":
             iter_ = data.iterator.pool(data_,
                                        self.config.batchsize,
-                                       key=lambda x: len(x[1]))
+                                       key=lambda x: len(x[1]),
+                                       random_shuffler=
+                                       data.iterator.RandomShuffler())
             return iter_
 
     def _run_epoch(self, train_data, dev_data, unlabel_data):
