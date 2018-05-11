@@ -12,7 +12,7 @@ def load_pretrained_embeddings(filename, known_vocab=None, unif_weight=None):
     word_vectors = []
     count = 0
     unknown_vocab = []
-    embeddings = KeyedVectors.load_word2vec_format(filename, binary=False)
+    embeddings = KeyedVectors.load_word2vec_format(filename, binary=False, unicode_errors='ignore')
     for i in range(len(known_vocab)):
         word = known_vocab[i]
         try:
