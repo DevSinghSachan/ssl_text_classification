@@ -12,7 +12,7 @@ python preprocess.py --corpus elec --output ${OUT}/data --vocab_size 40000 --sav
 # Create pre-trained word embeddings
 python w2v.py --input ${OUT}/data --save_data "demo_fastText" --embeddings "${HOME}/crawl-300d-2M.vec" # "vectors_elec.txt"
 
-
+exit
 # Train the model
 PYTHONIOENCODING=utf-8 python main.py --corpus elec --model LSTMEncoder --debug --save_data "demo_fastText" \
 --multi_gpu --input ${OUT}/data --output_path ${OUT}/model --exp_name "elec_clf_entropy_vat" \
