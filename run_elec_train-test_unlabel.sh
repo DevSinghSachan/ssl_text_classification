@@ -6,7 +6,7 @@ OUT="temp/$NAME"
 mkdir -p ${OUT}
 
 # Preprocess
-python preprocess.py --corpus elec --output ${OUT}/data --vocab_size 40000 --save_data "demo_fastText" --elec_unlabel "train-test.txt"
+python preprocess.py --corpus elec --output ${OUT}/data --vocab_size 40000 --save_data "demo_fastText" --elec_unlabel "elec/train-test.txt"
 
 # Create pre-trained word embeddings
 python w2v.py --input ${OUT}/data --save_data "demo_fastText" --embeddings "${HOME}/crawl-300d-2M.vec" # "vectors_elec.txt"
