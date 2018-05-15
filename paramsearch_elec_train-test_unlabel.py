@@ -19,12 +19,12 @@ def work(id, queue):
         arg_string = \
         'env CUDA_VISIBLE_DEVICES={} PYTHONIOENCODING=utf-8 python main.py --corpus elec --model LSTMEncoder '\
         '--debug --save_data demo_fastText '\
-        '--multi_gpu --input temp/elec_vat/data --output_path temp/elec_vat/model '\
+        '--multi_gpu --input temp/elec_vat_train-test_unlabel/data --output_path temp/elec_vat_train-test_unlabel/model '\
         '--exp_name elec_clf_at_{}_vat_{}_ent '\
         '--use_pretrained_embeddings --nepoch_no_imprv 20 --timedistributed --d_hidden 512 --nepochs 40 --optim adam '\
         '--wbatchsize 2000 --wbatchsize_unlabel 4000 --eval_steps 700 --lstm_dropout 0.5 --word_dropout 0.5 '\
         '--beta1 0.0 --num_layers 1 --beta2 0.98 --scheduler ExponentialLR --gamma 0.99998 '\
-        '--perturb_norm_length {} --lambda_entropy 1.0 --lambda_vat 1.0 --lambda_at 0.0 '\
+        '--perturb_norm_length {} --lambda_entropy 1.0 --lambda_vat 1.0 --lambda_at 1.0 '\
         '--inc_unlabeled_loss --unlabeled_loss_type Unlabel'
 
         cmd_string = arg_string.format(gpu_id,
