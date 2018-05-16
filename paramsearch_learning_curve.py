@@ -28,7 +28,7 @@ def work(id, queue):
         print(cmd_string)
         my_env = os.environ.copy()
         my_env['CUDA_VISIBLE_DEVICES'] = gpu_id
-        # subprocess.call(cmd_string.split(), shell=False)
+        subprocess.call(cmd_string.split(), shell=False)
 
     queue.put(None)
 
