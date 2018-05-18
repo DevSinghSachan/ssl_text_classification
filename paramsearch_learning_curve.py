@@ -16,10 +16,10 @@ def work(id, queue):
         if arg_val is None:
             break
 
-        arg_string = 'env CUDA_VISIBLE_DEVICES={} bash run_elec_learningcurve.sh {} {} {} {} {}'
+        arg_string = 'env CUDA_VISIBLE_DEVICES={} bash run_imdb_learningcurve.sh {} {} {} {} {}'
 
         cmd_string = arg_string.format(gpu_id,
-                                       'elec',
+                                       'aclImdb_tok',
                                        arg_val[0],
                                        arg_val[1],
                                        arg_val[2],
