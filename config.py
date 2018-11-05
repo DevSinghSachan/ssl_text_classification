@@ -257,7 +257,7 @@ def get_preprocess_args():
                         default='rcv1/train.txt',
                         type=str)
     parser.add_argument('--rcv1_unlabel',
-                        default='rcv1/train.txt',
+                        default='rcv1/unlabel.txt',
                         type=str)
 
     # imdbSimple
