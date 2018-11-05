@@ -246,6 +246,19 @@ def get_preprocess_args():
                         default='dbpedia/train.txt',
                         type=str)
 
+    # RCV1-v2
+    parser.add_argument('--rcv1_dev',
+                        default='rcv1/test.txt',
+                        type=str)  # No dev set, test and dev set are the same
+    parser.add_argument('--rcv1_test',
+                        default='rcv1/test.txt',
+                        type=str)
+    parser.add_argument('--rcv1_train',
+                        default='rcv1/train.txt',
+                        type=str)
+    parser.add_argument('--rcv1_unlabel',
+                        default='rcv1/train.txt',
+                        type=str)
 
     # imdbSimple
     parser.add_argument('--imdbSimple_dev',
