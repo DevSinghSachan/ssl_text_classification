@@ -261,25 +261,31 @@ def get_preprocess_args():
                         type=str)
 
     # imdbSimple
-    parser.add_argument('--imdbSimple_dev',
+    parser.add_argument('--imdb_dev',
                         default='imdb/test.txt',
                         type=str)  # No dev set, test and dev set are the same
-    parser.add_argument('--imdbSimple_test',
+    parser.add_argument('--imdb_test',
                         default='imdb/test.txt',
                         type=str)
-    parser.add_argument('--imdbSimple_train',
+    parser.add_argument('--imdb_train',
                         default='imdb/train.txt',
+                        type=str)
+    parser.add_argument('--imdb_unlabel',
+                        default='imdb/test.txt',
                         type=str)
 
     # arxiv simple
-    parser.add_argument('--arxivSimple_dev',
-                        default='arxiv_abstracts/test.txt',
+    parser.add_argument('--arxiv_dev',
+                        default='arxiv/test.txt',
                         type=str)  # No dev set, test and dev set are the same
-    parser.add_argument('--arxivSimple_test',
-                        default='arxiv_abstracts/test.txt',
+    parser.add_argument('--arxiv_test',
+                        default='arxiv/test.txt',
                         type=str)
-    parser.add_argument('--arxivSimple_train',
-                        default='arxiv_abstracts/train.txt',
+    parser.add_argument('--arxiv_train',
+                        default='arxiv/train.txt',
+                        type=str)
+    parser.add_argument('--arxiv_unlabel',
+                        default='arxiv/test.txt',
                         type=str)
 
     # Corpus Name
