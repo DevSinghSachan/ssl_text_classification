@@ -217,13 +217,14 @@ class Training(object):
         self._train(train, dev, unlabel)
         self._evaluate(test)
 
-    def _create_iter(self, data_, wbatchsize):
+    def _create_iter(self, data_, wbatchsize,
+                     random_shuffler=data.iterator.RandomShuffler()):
         iter_ = data.iterator.pool(data_,
                                    wbatchsize,
                                    key=lambda x: len(x[1]),
                                    batch_size_fn=batch_size_fn,
-                                   random_shuffler=
-                                   data.iterator.RandomShuffler())
+                                   random_shuffler=random_shuffler
+                                   )
         return iter_
 
     def _run_epoch(self, train_data, dev_data, unlabel_data):
@@ -433,7 +434,8 @@ class Training(object):
         pr_curve_data = []
         cm = ConfusionMatrix(self.classes)
         accuracy_list = []
-        test_iter = self._create_iter(test_data, self.config.wbatchsize)
+        test_iter = self._create_iter(test_data, self.config.wbatchsize,
+                                      random_shuffler=utils.identity_fun)
         for test_batch in test_iter:
             test_batch = batch_utils.seq_pad_concat(test_batch, -1)
             pred, acc = self._predict_batch(cm, test_batch)
@@ -475,5 +477,12 @@ class Training(object):
     def _evaluate(self, test_data):
         self.logger.info("Evaluating model over test set")
         self._load_model()
-        _, accuracy, _ = self._run_evaluate(test_data)
+        _, accuracy, prc_test = self._run_evaluate(test_data)
+        pred_, lab_ = zip(*prc_test)
+        pred_ = torch.cat(pred_).cpu().tolist()
+        lab_ = torch.cat(lab_).cpu().tolist()
+        path_ = os.path.join(self.config.output_path, "{}_pred_gt.tsv".format(self.config.exp_name))
+        with open(path_, 'w') as fp:
+            for p, l in zip(pred_, lab_):
+                fp.write(str(p) + '\t' + str(l))
         self.logger.info("- test accuracy {}".format(accuracy))

@@ -2,6 +2,10 @@ import time
 import sys
 
 
+def identity_fun(x):
+    return x
+
+
 class Statistics(object):
     """
     Accumulator for loss statistics.
