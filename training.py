@@ -484,5 +484,5 @@ class Training(object):
         path_ = os.path.join(self.config.output_path, "{}_pred_gt.tsv".format(self.config.exp_name))
         with open(path_, 'w') as fp:
             for p, l in zip(pred_, lab_):
-                fp.write(str(p) + '\t' + str(l))
+                fp.write(str(p) + '\t' + str(l) + '\n')
         self.logger.info("- test accuracy {}".format(accuracy))
