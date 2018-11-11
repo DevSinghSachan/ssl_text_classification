@@ -38,7 +38,7 @@ def main():
 
     # Add in default model arguments, possibly added since training.
     model = torch.load(args.model, map_location=lambda storage, loc: storage)
-    encoder_embeddings = model['state_dict_embedder'].weight.data.tolist()
+    encoder_embeddings = model['state_dict_embedder']['embedder.weight'].tolist()
 
     print("Writing embeddings")
     write_embeddings(os.path.join(args.output_dir, "src_embeddings.txt"),
