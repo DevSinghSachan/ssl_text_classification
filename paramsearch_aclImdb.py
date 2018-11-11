@@ -1,0 +1,73 @@
+import os
+import sys
+from multiprocessing import Process, Queue
+import subprocess
+import itertools
+
+num_gpus = int(sys.argv[1])
+
+
+def work(id, queue):
+    gpu_id = str(id)
+
+    while True:
+        arg_val = queue.get()
+
+        if arg_val is None:
+            break
+
+        arg_string = \
+        'env CUDA_VISIBLE_DEVICES={} PYTHONIOENCODING=utf-8 python main.py --corpus aclImdb_tok --model LSTMEncoder '\
+        '--debug --save_data demo '\
+        '--multi_gpu --input temp/aclImdbSimpleAnalysis_mixed/data --output_path temp/aclImdbSimpleAnalysis_mixed/model '\
+        '--exp_name "aclImdb_l{}_mixed" '\
+        '--use_pretrained_embeddings --nepoch_no_imprv 20 --timedistributed --d_hidden 512 --nepochs 50 --optim adam '\
+        '--eval_steps 1000 --lstm_dropout 0.5 --word_dropout 0.5 '\
+        '--beta1 0.0 --num_layers {} --beta2 0.98 '\
+        '--lambda_entropy 1.0 --lambda_vat 1.0 --lambda_at 1.0 ' \
+        '--inc_unlabeled_loss --wbatchsize 3000 --wbatchsize_unlabel 3000'
+
+        cmd_string = arg_string.format(gpu_id,
+                                       arg_val[0],
+                                       arg_val[0])
+
+        print(cmd_string)
+        my_env = os.environ.copy()
+        my_env['CUDA_VISIBLE_DEVICES'] = gpu_id
+        subprocess.call(cmd_string.split(), shell=False)
+
+    queue.put(None)
+
+
+num_layers = [2, 3, 4]
+
+def serve(queue):
+    for tuple_ in itertools.product(num_layers):
+        queue.put(tuple_)
+
+
+# https://stackoverflow.com/questions/914821/producer-consumer-problem-with-python-multiprocessing
+class Manager:
+    def __init__(self):
+        self.queue = Queue()
+        self.num_process = num_gpus
+
+    def start(self):
+        print("starting %d workers" % self.num_process)
+        self.workers = [Process(target=work, args=(i, self.queue,))
+                        for i in range(self.num_process)]
+        for w in self.workers:
+            w.start()
+        serve(self.queue)
+
+    def stop(self):
+        self.queue.put(None)
+        for i in range(self.num_process):
+            self.workers[i].join()
+        self.queue.close()
+
+
+if __name__ == '__main__':
+    m = Manager()
+    m.start()
+    m.stop()
