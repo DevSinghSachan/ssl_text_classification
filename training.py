@@ -430,12 +430,18 @@ class Training(object):
         accuracy = self.get_accuracy(cm, pred.data, batch.labels.data)
         return pred, accuracy
 
+    def chunks(self, l, n=15):
+        """Yield successive n-sized chunks from l."""
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
     def _run_evaluate(self, test_data):
         pr_curve_data = []
         cm = ConfusionMatrix(self.classes)
         accuracy_list = []
-        test_iter = self._create_iter(test_data, self.config.wbatchsize,
-                                      random_shuffler=utils.identity_fun)
+        # test_iter = self._create_iter(test_data, self.config.wbatchsize,
+        #                               random_shuffler=utils.identity_fun)
+        test_iter = self.chunks(test_data)
         for test_batch in test_iter:
             test_batch = batch_utils.seq_pad_concat(test_batch, -1)
             pred, acc = self._predict_batch(cm, test_batch)
