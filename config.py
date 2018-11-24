@@ -287,6 +287,20 @@ def get_preprocess_args():
     parser.add_argument('--arxiv_unlabel',
                         default='arxiv/test.txt',
                         type=str)
+ 
+    # Quora Insincere Questions
+    parser.add_argument('--quora_iq_dev',
+                        default='quora_iq/test.txt',
+                        type=str)  # No dev set, test and dev set are the same
+    parser.add_argument('--quora_iq_test',
+                        default='quora_iq/test.txt',
+                        type=str)
+    parser.add_argument('--quora_iq_train',
+                        default='quora_iq/train.txt',
+                        type=str)
+    parser.add_argument('--quora_iq_unlabel',
+                        default='quora_iq/test.txt',
+                        type=str)
 
     # Corpus Name
     parser.add_argument('--corpus', default='sst', type=str)
