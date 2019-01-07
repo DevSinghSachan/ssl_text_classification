@@ -151,6 +151,7 @@ class Classifier(nn.Module):
                                            config.d_down_proj,
                                            config.init_scalar)
             self.act = nn.ReLU()
+            self.ln = LayerNorm(config.d_down_proj, eps=1e-3)
             seq_in_size = config.d_down_proj
         self.clf = _linear(seq_in_size,
                            config.num_classes,
@@ -164,7 +165,8 @@ class Classifier(nn.Module):
             normalize = 1. / np.sqrt(self.max_sent_len)
             sent_output = torch.sum(x, 2).mul_(normalize)
         if self.config.down_projection:
-            sent_output = self.act(self.down_projection(sent_output))
+            sent_output = self.ln(self.act(self.down_projection(sent_output)))
+
         logits = self.clf(sent_output)
         return logits
 
@@ -234,7 +236,7 @@ class Encoder(nn.Module):
         for i in range(config.num_layers):
             layer = EncoderLayer(config)
             self.layers.append(layer)
-        self.ln = LayerNorm(config.d_units, eps=1e-3)
+        # self.ln = LayerNorm(config.d_units, eps=1e-3)
 
     def forward(self, e, sent_len):
         for layer in self.layers:
