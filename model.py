@@ -230,7 +230,7 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.config = config
         self.layers = torch.nn.ModuleList()
-        for i in range(config.n_layers):
+        for i in range(config.num_layers):
             layer = EncoderLayer(config)
             self.layers.append(layer)
         self.ln = LayerNorm(config.d_units, eps=1e-3)
