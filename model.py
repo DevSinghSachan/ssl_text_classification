@@ -198,7 +198,7 @@ class LstmPadding(object):
 
         memory_bank = nn.utils.rnn.pad_packed_sequence(memory_bank)[0]
         memory_bank = memory_bank.index_select(1, Variable(idx_unsort))
-        memory_bank = memory_bank.transpose(0, 1).contiguous()
+        # memory_bank = memory_bank.transpose(0, 1).contiguous()
         return memory_bank, enc_final
 
 
@@ -238,6 +238,7 @@ class Encoder(nn.Module):
         for layer in self.layers:
             e, enc_final = layer(e, sent_len)
         e = self.ln(e)
+        e = e.transpose(0, 1).contiguous()
         return e, enc_final
 
 
