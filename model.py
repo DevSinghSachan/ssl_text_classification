@@ -220,7 +220,7 @@ class EncoderLayer(nn.Module):
         memory_bank, encoder_final = LstmPadding(self.ln_1(inputs),
                                                  sent_len,
                                                  self.config)(self.rnn)
-        e = inputs + self.dropout(memory_bank)
+        e = self.dropout(memory_bank)
         return e, encoder_final
 
 
@@ -303,7 +303,7 @@ class LSTMEncoder(nn.Module):
         seq_in_size = config.d_hidden
         if config.brnn:
             seq_in_size *= 2
-        self.lstm_dropout = nn.Dropout(config.lstm_dropout)
+        # self.lstm_dropout = nn.Dropout(config.lstm_dropout)
         self.config = config
 
     def encode_sent(self, embedded, sent_len):
@@ -317,7 +317,7 @@ class LSTMEncoder(nn.Module):
 
     def forward(self, embedded, batch, *args, **kwargs):
         memory_bank, encoder_final = self.encode_sent(embedded, batch.sent_len)
-        memory_bank = self.lstm_dropout(memory_bank)
+        # memory_bank = self.lstm_dropout(memory_bank)
         return memory_bank, encoder_final
 
 
