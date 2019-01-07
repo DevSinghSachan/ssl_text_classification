@@ -205,12 +205,14 @@ class LstmPadding(object):
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, layer_id):
         super(EncoderLayer, self).__init__()
         self.config = config
         seq_out_size = config.d_hidden
         if config.brnn:
             seq_out_size *= 2
+        if layer_id > 0:
+            config.encoder_input_size = 2 * config.d_hidden
         self.rnn = nn.LSTM(input_size=config.encoder_input_size,
                            hidden_size=config.d_hidden,
                            num_layers=1,
@@ -234,7 +236,7 @@ class Encoder(nn.Module):
         self.config = config
         self.layers = torch.nn.ModuleList()
         for i in range(config.num_layers):
-            layer = EncoderLayer(config)
+            layer = EncoderLayer(config, i)
             self.layers.append(layer)
         # self.ln = LayerNorm(config.d_units, eps=1e-3)
 
