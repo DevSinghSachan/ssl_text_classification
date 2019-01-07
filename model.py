@@ -16,6 +16,19 @@ if torch.cuda.is_available():
     torch.cuda.set_device(0)
 
 
+class LayerNorm(nn.Module):
+    def __init__(self, features, eps=1e-6):
+        super(LayerNorm, self).__init__()
+        self.a_2 = nn.Parameter(torch.ones(features))
+        self.b_2 = nn.Parameter(torch.zeros(features))
+        self.eps = eps
+
+    def forward(self, x):
+        mean = x.mean(-1, keepdim=True)
+        std = x.std(-1, keepdim=True)
+        return self.a_2 * (x - mean) / (std + self.eps) + self.b_2
+
+
 def _sequence_mask(sequence_length, max_len=None):
     sequence_length = Variable(
         torch.from_numpy(sequence_length).type(batch_utils.LONG_TYPE),
@@ -190,19 +203,43 @@ class LstmPadding(object):
         return memory_bank, enc_final
 
 
+class EncoderLayer(nn.Module):
+    def __init__(self, config):
+        super(EncoderLayer, self).__init__()
+        self.config = config
+        self.ln_1 = LayerNorm(config.d_units,
+                              eps=1e-3)
+        self.rnn = nn.LSTM(input_size=config.encoder_input_size,
+                           hidden_size=config.d_hidden,
+                           num_layers=1,
+                           dropout=config.lstm_dropout,
+                           bidirectional=config.brnn)
+        self.dropout = nn.Dropout(config.lstm_dropout)
+
+    def forward(self, inputs, sent_len):
+        # memory_bank, encoder_final = self.rnn(self.ln_1(inputs))
+        memory_bank, encoder_final = LstmPadding(self.ln_1(inputs),
+                                                 sent_len,
+                                                 self.config)(self.rnn)
+        e = inputs + self.dropout(memory_bank)
+        return e, encoder_final
+
+
 class Encoder(nn.Module):
     def __init__(self, config):
         super(Encoder, self).__init__()
         self.config = config
-        self.rnn = nn.LSTM(input_size=config.encoder_input_size,
-                           hidden_size=config.d_hidden,
-                           num_layers=config.num_layers,
-                           dropout=config.lstm_dropout,
-                           bidirectional=config.brnn)
+        self.layers = torch.nn.ModuleList()
+        for i in range(config.n_layers):
+            layer = EncoderLayer(config)
+            self.layers.append(layer)
+        self.ln = LayerNorm(config.d_units, eps=1e-3)
 
-    def forward(self, inputs, batch_size):
-        memory_bank, encoder_final = self.rnn(inputs)
-        return memory_bank, encoder_final
+    def forward(self, e, sent_len):
+        for layer in self.layers:
+            e, enc_final = layer(e, sent_len)
+        e = self.ln(e)
+        return e, enc_final
 
 
 class Embedder(nn.Module):
@@ -262,7 +299,7 @@ class LSTMEncoder(nn.Module):
         config.encoder_input_size = config.d_proj \
             if config.projection else config.d_units
 
-        self.lstm_encoder = Encoder(config)
+        self.encoder = Encoder(config)
         seq_in_size = config.d_hidden
         if config.brnn:
             seq_in_size *= 2
@@ -272,14 +309,14 @@ class LSTMEncoder(nn.Module):
     def encode_sent(self, embedded, sent_len):
         if self.config.projection:
             embedded = self.act1(self.projection(embedded))
-        memory_bank, encoder_final = LstmPadding(embedded,
-                                                 sent_len,
-                                                 self.config)(self.lstm_encoder)
+        # memory_bank, encoder_final = LstmPadding(embedded,
+        #                                          sent_len,
+        #                                          self.config)(self.lstm_encoder)
+        memory_bank, encoder_final = self.encoder(embedded, sent_len)
         return memory_bank, encoder_final
 
     def forward(self, embedded, batch, *args, **kwargs):
-        memory_bank, encoder_final = self.encode_sent(embedded,
-                                                      batch.sent_len)
+        memory_bank, encoder_final = self.encode_sent(embedded, batch.sent_len)
         memory_bank = self.lstm_dropout(memory_bank)
         return memory_bank, encoder_final
 
