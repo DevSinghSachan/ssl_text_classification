@@ -206,21 +206,23 @@ class EncoderLayer(nn.Module):
     def __init__(self, config):
         super(EncoderLayer, self).__init__()
         self.config = config
-        self.ln_1 = LayerNorm(config.d_units,
-                              eps=1e-3)
+        seq_out_size = config.d_hidden
+        if config.brnn:
+            seq_out_size *= 2
         self.rnn = nn.LSTM(input_size=config.encoder_input_size,
                            hidden_size=config.d_hidden,
                            num_layers=1,
                            dropout=config.lstm_dropout,
                            bidirectional=config.brnn)
         self.dropout = nn.Dropout(config.lstm_dropout)
+        self.ln = LayerNorm(seq_out_size, eps=1e-3)
 
     def forward(self, inputs, sent_len):
         # memory_bank, encoder_final = self.rnn(self.ln_1(inputs))
-        memory_bank, encoder_final = LstmPadding(self.ln_1(inputs),
+        memory_bank, encoder_final = LstmPadding(inputs,
                                                  sent_len,
                                                  self.config)(self.rnn)
-        e = self.dropout(memory_bank)
+        e = self.ln(self.dropout(memory_bank))
         return e, encoder_final
 
 
@@ -237,7 +239,7 @@ class Encoder(nn.Module):
     def forward(self, e, sent_len):
         for layer in self.layers:
             e, enc_final = layer(e, sent_len)
-        e = self.ln(e)
+        # e = self.ln(e)
         e = e.transpose(0, 1).contiguous()
         return e, enc_final
 
@@ -299,6 +301,7 @@ class LSTMEncoder(nn.Module):
         config.encoder_input_size = config.d_proj \
             if config.projection else config.d_units
 
+        self.ln = LayerNorm(config.encoder_input_size, eps=1e-3)
         self.encoder = Encoder(config)
         seq_in_size = config.d_hidden
         if config.brnn:
@@ -316,6 +319,7 @@ class LSTMEncoder(nn.Module):
         return memory_bank, encoder_final
 
     def forward(self, embedded, batch, *args, **kwargs):
+        embedded = self.ln(embedded)
         memory_bank, encoder_final = self.encode_sent(embedded, batch.sent_len)
         # memory_bank = self.lstm_dropout(memory_bank)
         return memory_bank, encoder_final
