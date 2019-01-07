@@ -191,8 +191,7 @@ class LstmPadding(object):
         # Un-sort by length
         idx_unsort = torch.from_numpy(self.idx_unsort). \
             type(batch_utils.LONG_TYPE)
-        memory_bank, enc_final = lstm_enc_func(self.sent_packed,
-                                               self.batch_size)
+        memory_bank, enc_final = lstm_enc_func(self.sent_packed)
 
         enc_final = enc_final[0].index_select(1, Variable(idx_unsort)), \
                     enc_final[1].index_select(1, Variable(idx_unsort))
