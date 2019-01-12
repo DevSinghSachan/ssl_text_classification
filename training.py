@@ -285,6 +285,7 @@ class Training(object):
             lvat = Variable(
                 torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_at > 0:
+                self.enc_clf_opt.zero_grad()
                 lat = at_loss(self.embedder,
                               self.encoder,
                               self.clf,
@@ -292,6 +293,7 @@ class Training(object):
                               perturb_norm_length=self.config.perturb_norm_length)
 
             if self.config.lambda_vat > 0:
+                self.enc_clf_opt.zero_grad()
                 lvat_train = vat_loss(self.embedder,
                                       self.encoder,
                                       self.clf,
@@ -299,6 +301,7 @@ class Training(object):
                                       p_logit=pred,
                                       perturb_norm_length=self.config.perturb_norm_length)
                 if self.config.inc_unlabeled_loss:
+                    self.enc_clf_opt.zero_grad()
                     lvat_unlabel = vat_loss(self.embedder,
                                             self.encoder,
                                             self.clf,
@@ -314,8 +317,10 @@ class Training(object):
 
             lentropy = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_entropy > 0:
+                self.enc_clf_opt.zero_grad()
                 lentropy_train = entropy_loss(pred)
                 if self.config.inc_unlabeled_loss:
+                    self.enc_clf_opt.zero_grad()
                     lentropy_unlabel = entropy_loss(self.clf(memory_bank_unlabel))
                     if self.config.unlabeled_loss_type == "AvgTrainUnlabel":
                         lentropy = 0.5 * (lentropy_train + lentropy_unlabel)
@@ -326,6 +331,7 @@ class Training(object):
 
             lae = Variable(torch.FloatTensor([-1.]).type(batch_utils.FLOAT_TYPE))
             if self.config.lambda_ae > 0:
+                self.enc_clf_opt.zero_grad()
                 lae = self.ae(memory_bank_unlabel,
                               enc_final_unlabel,
                               unlabel_batch.sent_len,
