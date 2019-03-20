@@ -238,7 +238,7 @@ class Training(object):
         self.clf.train()
         self.embedder.train()
         train_iter = self._create_iter(train_data, self.config.wbatchsize)
-        unlabel_iter = self._create_iter(dev_data,
+        unlabel_iter = self._create_iter(unlabel_data,
                                          self.config.wbatchsize_unlabel)
         for batch_index, train_batch_raw in enumerate(train_iter):
             seq_iter = list(zip(*train_batch_raw))[1]

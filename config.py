@@ -127,7 +127,7 @@ def get_train_args():
 
     parser.add_argument('--perturb_norm_length', default=5.0, type=float)
     parser.add_argument('--max_embedding_norm', default=None, type=float)
-    
+
     parser.add_argument('--normalize_embedding', dest='normalize_embedding', action='store_true')
     parser.set_defaults(normalize_embedding=False)
 
@@ -192,8 +192,8 @@ def get_preprocess_args():
 
     # ACLImdb Tokenized
     parser.add_argument('--aclImdb_tok_dev',
-                        default='aclImdb_tok/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='aclImdb_tok/dev.txt',
+                        type=str)
     parser.add_argument('--aclImdb_tok_test',
                         default='aclImdb_tok/test.txt',
                         type=str)
@@ -206,8 +206,8 @@ def get_preprocess_args():
 
     # Elec
     parser.add_argument('--elec_dev',
-                        default='elec/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='elec/dev.txt',
+                        type=str)
     parser.add_argument('--elec_test',
                         default='elec/test.txt',
                         type=str)
@@ -220,8 +220,8 @@ def get_preprocess_args():
 
     # Agnews
     parser.add_argument('--agnews_dev',
-                        default='agnews/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='agnews/dev.txt',
+                        type=str)
     parser.add_argument('--agnews_test',
                         default='agnews/test.txt',
                         type=str)
@@ -234,8 +234,8 @@ def get_preprocess_args():
 
     # Dbpedia
     parser.add_argument('--dbpedia_dev',
-                        default='dbpedia/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='dbpedia/dev.txt',
+                        type=str)
     parser.add_argument('--dbpedia_test',
                         default='dbpedia/test.txt',
                         type=str)
@@ -248,8 +248,8 @@ def get_preprocess_args():
 
     # RCV1-v2
     parser.add_argument('--rcv1_dev',
-                        default='rcv1/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='rcv1/dev.txt',
+                        type=str)
     parser.add_argument('--rcv1_test',
                         default='rcv1/test.txt',
                         type=str)
@@ -262,8 +262,8 @@ def get_preprocess_args():
 
     # imdbSimple
     parser.add_argument('--imdb_dev',
-                        default='imdb/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='imdb/dev.txt',
+                        type=str)
     parser.add_argument('--imdb_test',
                         default='imdb/test.txt',
                         type=str)
@@ -276,8 +276,8 @@ def get_preprocess_args():
 
     # arxiv simple
     parser.add_argument('--arxiv_dev',
-                        default='arxiv/test.txt',
-                        type=str)  # No dev set, test and dev set are the same
+                        default='arxiv/dev.txt',
+                        type=str)
     parser.add_argument('--arxiv_test',
                         default='arxiv/test.txt',
                         type=str)
@@ -287,7 +287,7 @@ def get_preprocess_args():
     parser.add_argument('--arxiv_unlabel',
                         default='arxiv/test.txt',
                         type=str)
- 
+
     # Quora Insincere Questions
     parser.add_argument('--quora_iq_dev',
                         default='quora_iq/test.txt',
@@ -303,7 +303,7 @@ def get_preprocess_args():
                         type=str)
 
     # Corpus Name
-    parser.add_argument('--corpus', default='sst', type=str)
+    parser.add_argument('--corpus', default='aclImdb_tok', type=str)
 
     args = parser.parse_args()
     args.train_filename = eval("args." + args.corpus + "_train")

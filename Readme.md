@@ -1,16 +1,14 @@
-* `w2v.py`: This module can be used to read a pretrained embeddings file from a tool such as word2vec and can save the embeddings of our vocab words in numpy serialized file.
-```bash
-python -m utils.w2v --input data/ICD10 --data demo --embeddings embedding_vec.txt
+
+#### Requirements
+* Please install the dependencies from the `requirements.txt` file
+* The environment can be setup by following the instructions in the `Readme.md` file
+
+
+#### Demo Script
+* The following script is provided for demo purposes
 ```
-In the above command, "embedding_vec.txt" file is obtained after training the model with word2vec tool.
-
-
-* Visualize the top-K embeddings:
-```bash
-# ML Objective  
-python extract_embeddings.py --input temp/aclImdbSimple_pretrained/data/ --data demo --model temp/aclImdbSimple_pretrained/model/aclImdbSimple_pretrained_ce.pt --output_dir temp/aclImdbSimple_pretrained/model/ --gpu 1
-
-# Mixed Objective
-python extract_embeddings.py --input temp/aclImdbSimple_pretrained_mixed/data/ --data demo --model temp/aclImdbSimple_pretrained_mixed/model/aclImdbSimple_pretrained_mixed.pt --output_dir temp/aclImdbSimple_pretrained_mixed/model/ --gpu 1
+bash run_aclImdbSimple_pretrained_mixed.sh
 ```
+* Pre-trained word embeddings for ACL-IMDB dataset can be downloaded here: (`vectors_aclImdb.txt`)[https://drive.google.com/file/d/1CdLciMHpB6PrpINyDe6xHY_zGx8kWXex/view?usp=sharing]
 
+* This repository will be further updated with shell scripts for all the datasets
