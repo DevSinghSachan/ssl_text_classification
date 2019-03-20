@@ -1,7 +1,7 @@
 
 #### Requirements
 * Please install the dependencies from the `requirements.txt` file
-* The environment can be setup by following the instructions in the `Readme.md` file
+* The environment can be setup by following the instructions in the `startup_script.sh` file
 
 
 #### Demo Script
