@@ -172,7 +172,7 @@ class LstmPadding(object):
         sent = sent.index_select(1, Variable(idx_sort))
 
         # Handling padding in Recurrent Networks
-        self.sent_packed = nn.utils.rnn.pack_padded_sequence(sent, sent_len)
+        self.sent_packed = nn.utils.rnn.pack_padded_sequence(sent, sent_len.copy())
 
     def __call__(self, lstm_enc_func):
         # Un-sort by length
